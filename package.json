@@ -59,6 +59,7 @@
     "protobufjs": "^7.3.2"
   },
   "devDependencies": {
+    "@bufbuild/protobuf": "^2.8.0",
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
     "@types/jest": "^29.0.0",
@@ -79,7 +80,7 @@
     "run-script-os": "^1.1.6",
     "ts-jest": "^29.0.0",
     "ts-node": "^10.2.1",
-    "ts-proto": "^1.180.0",
+    "ts-proto": "^2.7.7",
     "typescript": "^4.2.4",
     "web-streams-polyfill": "4.0.0"
   },

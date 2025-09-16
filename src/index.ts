@@ -1,10 +1,10 @@
-import { Request, Response, RequestResponse, Notification } from './studio';
+import { Request, Response, RequestResponse, Notification } from "./studio";
 
-import { get_encoder, get_decoder } from './framing';
-import { RpcTransport } from './transport';
+import { get_encoder, get_decoder } from "./framing";
+import { RpcTransport } from "./transport";
 
-import { Mutex } from 'async-mutex';
-import { ErrorConditions } from './meta';
+import { Mutex } from "async-mutex";
+import { ErrorConditions } from "./meta";
 export { Request, RequestResponse, Response, Notification };
 
 export interface RpcConnection {
@@ -19,7 +19,10 @@ export interface CreateRpcConnectionOpts {
   signal?: AbortSignal;
 }
 
-export function create_rpc_connection(transport: RpcTransport, opts?: CreateRpcConnectionOpts): RpcConnection {
+export function create_rpc_connection(
+  transport: RpcTransport,
+  opts?: CreateRpcConnectionOpts
+): RpcConnection {
   let { writable: request_writable, readable: byte_readable } =
     new TransformStream<Request, Uint8Array>({
       transform(chunk, controller) {
@@ -32,10 +35,15 @@ export function create_rpc_connection(transport: RpcTransport, opts?: CreateRpcC
     .pipeThrough(new TransformStream(get_encoder()), { signal: opts?.signal })
     .pipeTo(transport.writable, { signal: opts?.signal });
 
-  reqPipelineClosed.catch((r) => {console.log("Closed error", r); return r}).then(async (reason: any) => {
-    await byte_readable.cancel();
-    transport.abortController.abort(reason);
-  });
+  reqPipelineClosed
+    .catch((r) => {
+      console.log("Closed error", r);
+      return r;
+    })
+    .then(async (reason: any) => {
+      await byte_readable.cancel();
+      transport.abortController.abort(reason);
+    });
 
   let response_readable = transport.readable
     .pipeThrough(new TransformStream(get_decoder()), { signal: opts?.signal })
@@ -102,7 +110,7 @@ export class MetaError extends Error {
 
 export async function call_rpc(
   conn: RpcConnection,
-  req: Omit<Request, 'requestId'>
+  req: Omit<Request, "requestId">
 ): Promise<RequestResponse> {
   return await rpcMutex.runExclusive(async () => {
     let request: Request = { ...req, requestId: conn.current_request++ };
@@ -117,11 +125,11 @@ export async function call_rpc(
     reader.releaseLock();
 
     if (done || !value) {
-      throw 'No response';
+      throw "No response";
     }
 
     if (value.requestId != request.requestId) {
-      throw 'Mismatch request IDs';
+      throw "Mismatch request IDs";
     }
 
     if (value.meta?.noResponse) {
