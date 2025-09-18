@@ -11,7 +11,7 @@ import { BehaviorBinding } from "./keymap";
 export const protobufPackage = "zmk.encoders";
 
 export interface Request {
-  /** simple presence */
+  /** presence-only */
   getInfo?: boolean | undefined;
   getMapping?: GetMappingRequest | undefined;
   setMapping?: SetMappingRequest | undefined;
@@ -19,16 +19,14 @@ export interface Request {
 }
 
 export interface Response {
-  getInfo?: GetInfoResponse | undefined;
-  getMapping?:
-    | GetMappingResponse
+  getInfo?:
+    | GetInfoResponse
     | undefined;
-  /** ok presence */
-  setMapping?:
-    | boolean
-    | undefined;
-  /** ok presence */
-  clearMapping?: boolean | undefined;
+  /**
+   * set_mapping and clear_mapping return ZMK_RPC_NO_RESPONSE (meta.no_response = true)
+   * No explicit response fields needed
+   */
+  getMapping?: GetMappingResponse | undefined;
 }
 
 export interface GetInfoResponse {
@@ -173,7 +171,7 @@ export const Request: MessageFns<Request> = {
 };
 
 function createBaseResponse(): Response {
-  return { getInfo: undefined, getMapping: undefined, setMapping: undefined, clearMapping: undefined };
+  return { getInfo: undefined, getMapping: undefined };
 }
 
 export const Response: MessageFns<Response> = {
@@ -183,12 +181,6 @@ export const Response: MessageFns<Response> = {
     }
     if (message.getMapping !== undefined) {
       GetMappingResponse.encode(message.getMapping, writer.uint32(18).fork()).join();
-    }
-    if (message.setMapping !== undefined) {
-      writer.uint32(24).bool(message.setMapping);
-    }
-    if (message.clearMapping !== undefined) {
-      writer.uint32(32).bool(message.clearMapping);
     }
     return writer;
   },
@@ -216,22 +208,6 @@ export const Response: MessageFns<Response> = {
           message.getMapping = GetMappingResponse.decode(reader, reader.uint32());
           continue;
         }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.setMapping = reader.bool();
-          continue;
-        }
-        case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.clearMapping = reader.bool();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -245,8 +221,6 @@ export const Response: MessageFns<Response> = {
     return {
       getInfo: isSet(object.getInfo) ? GetInfoResponse.fromJSON(object.getInfo) : undefined,
       getMapping: isSet(object.getMapping) ? GetMappingResponse.fromJSON(object.getMapping) : undefined,
-      setMapping: isSet(object.setMapping) ? globalThis.Boolean(object.setMapping) : undefined,
-      clearMapping: isSet(object.clearMapping) ? globalThis.Boolean(object.clearMapping) : undefined,
     };
   },
 
@@ -257,12 +231,6 @@ export const Response: MessageFns<Response> = {
     }
     if (message.getMapping !== undefined) {
       obj.getMapping = GetMappingResponse.toJSON(message.getMapping);
-    }
-    if (message.setMapping !== undefined) {
-      obj.setMapping = message.setMapping;
-    }
-    if (message.clearMapping !== undefined) {
-      obj.clearMapping = message.clearMapping;
     }
     return obj;
   },
@@ -278,8 +246,6 @@ export const Response: MessageFns<Response> = {
     message.getMapping = (object.getMapping !== undefined && object.getMapping !== null)
       ? GetMappingResponse.fromPartial(object.getMapping)
       : undefined;
-    message.setMapping = object.setMapping ?? undefined;
-    message.clearMapping = object.clearMapping ?? undefined;
     return message;
   },
 };
