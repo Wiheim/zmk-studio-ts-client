@@ -40,6 +40,14 @@ export interface GetInfoResponse {
   hasRgbUnderglow: boolean;
 }
 
+export interface GetGlobalRgbRequest {
+}
+
+export interface GetGlobalRgbResponse {
+  /** Global RGB configuration */
+  config: RgbLayerConfig | undefined;
+}
+
 export interface GetLayerRgbRequest {
   /** Layer ID to query (0-based) */
   layerId: number;
@@ -70,6 +78,7 @@ export interface ClearLayerRgbResponse {
 
 export interface Request {
   getInfo?: GetInfoRequest | undefined;
+  getGlobalRgb?: GetGlobalRgbRequest | undefined;
   getLayerRgb?: GetLayerRgbRequest | undefined;
   setLayerRgb?: SetLayerRgbRequest | undefined;
   clearLayerRgb?: ClearLayerRgbRequest | undefined;
@@ -77,6 +86,7 @@ export interface Request {
 
 export interface Response {
   getInfo?: GetInfoResponse | undefined;
+  getGlobalRgb?: GetGlobalRgbResponse | undefined;
   getLayerRgb?: GetLayerRgbResponse | undefined;
   setLayerRgb?: SetLayerRgbResponse | undefined;
   clearLayerRgb?: ClearLayerRgbResponse | undefined;
@@ -382,6 +392,109 @@ export const GetInfoResponse: MessageFns<GetInfoResponse> = {
   fromPartial<I extends Exact<DeepPartial<GetInfoResponse>, I>>(object: I): GetInfoResponse {
     const message = createBaseGetInfoResponse();
     message.hasRgbUnderglow = object.hasRgbUnderglow ?? false;
+    return message;
+  },
+};
+
+function createBaseGetGlobalRgbRequest(): GetGlobalRgbRequest {
+  return {};
+}
+
+export const GetGlobalRgbRequest: MessageFns<GetGlobalRgbRequest> = {
+  encode(_: GetGlobalRgbRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetGlobalRgbRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetGlobalRgbRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): GetGlobalRgbRequest {
+    return {};
+  },
+
+  toJSON(_: GetGlobalRgbRequest): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetGlobalRgbRequest>, I>>(base?: I): GetGlobalRgbRequest {
+    return GetGlobalRgbRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetGlobalRgbRequest>, I>>(_: I): GetGlobalRgbRequest {
+    const message = createBaseGetGlobalRgbRequest();
+    return message;
+  },
+};
+
+function createBaseGetGlobalRgbResponse(): GetGlobalRgbResponse {
+  return { config: undefined };
+}
+
+export const GetGlobalRgbResponse: MessageFns<GetGlobalRgbResponse> = {
+  encode(message: GetGlobalRgbResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.config !== undefined) {
+      RgbLayerConfig.encode(message.config, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetGlobalRgbResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    const end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetGlobalRgbResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.config = RgbLayerConfig.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetGlobalRgbResponse {
+    return { config: isSet(object.config) ? RgbLayerConfig.fromJSON(object.config) : undefined };
+  },
+
+  toJSON(message: GetGlobalRgbResponse): unknown {
+    const obj: any = {};
+    if (message.config !== undefined) {
+      obj.config = RgbLayerConfig.toJSON(message.config);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetGlobalRgbResponse>, I>>(base?: I): GetGlobalRgbResponse {
+    return GetGlobalRgbResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetGlobalRgbResponse>, I>>(object: I): GetGlobalRgbResponse {
+    const message = createBaseGetGlobalRgbResponse();
+    message.config = (object.config !== undefined && object.config !== null)
+      ? RgbLayerConfig.fromPartial(object.config)
+      : undefined;
     return message;
   },
 };
@@ -727,7 +840,13 @@ export const ClearLayerRgbResponse: MessageFns<ClearLayerRgbResponse> = {
 };
 
 function createBaseRequest(): Request {
-  return { getInfo: undefined, getLayerRgb: undefined, setLayerRgb: undefined, clearLayerRgb: undefined };
+  return {
+    getInfo: undefined,
+    getGlobalRgb: undefined,
+    getLayerRgb: undefined,
+    setLayerRgb: undefined,
+    clearLayerRgb: undefined,
+  };
 }
 
 export const Request: MessageFns<Request> = {
@@ -735,14 +854,17 @@ export const Request: MessageFns<Request> = {
     if (message.getInfo !== undefined) {
       GetInfoRequest.encode(message.getInfo, writer.uint32(10).fork()).join();
     }
+    if (message.getGlobalRgb !== undefined) {
+      GetGlobalRgbRequest.encode(message.getGlobalRgb, writer.uint32(18).fork()).join();
+    }
     if (message.getLayerRgb !== undefined) {
-      GetLayerRgbRequest.encode(message.getLayerRgb, writer.uint32(18).fork()).join();
+      GetLayerRgbRequest.encode(message.getLayerRgb, writer.uint32(26).fork()).join();
     }
     if (message.setLayerRgb !== undefined) {
-      SetLayerRgbRequest.encode(message.setLayerRgb, writer.uint32(26).fork()).join();
+      SetLayerRgbRequest.encode(message.setLayerRgb, writer.uint32(34).fork()).join();
     }
     if (message.clearLayerRgb !== undefined) {
-      ClearLayerRgbRequest.encode(message.clearLayerRgb, writer.uint32(34).fork()).join();
+      ClearLayerRgbRequest.encode(message.clearLayerRgb, writer.uint32(42).fork()).join();
     }
     return writer;
   },
@@ -767,7 +889,7 @@ export const Request: MessageFns<Request> = {
             break;
           }
 
-          message.getLayerRgb = GetLayerRgbRequest.decode(reader, reader.uint32());
+          message.getGlobalRgb = GetGlobalRgbRequest.decode(reader, reader.uint32());
           continue;
         }
         case 3: {
@@ -775,11 +897,19 @@ export const Request: MessageFns<Request> = {
             break;
           }
 
-          message.setLayerRgb = SetLayerRgbRequest.decode(reader, reader.uint32());
+          message.getLayerRgb = GetLayerRgbRequest.decode(reader, reader.uint32());
           continue;
         }
         case 4: {
           if (tag !== 34) {
+            break;
+          }
+
+          message.setLayerRgb = SetLayerRgbRequest.decode(reader, reader.uint32());
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
             break;
           }
 
@@ -798,6 +928,7 @@ export const Request: MessageFns<Request> = {
   fromJSON(object: any): Request {
     return {
       getInfo: isSet(object.getInfo) ? GetInfoRequest.fromJSON(object.getInfo) : undefined,
+      getGlobalRgb: isSet(object.getGlobalRgb) ? GetGlobalRgbRequest.fromJSON(object.getGlobalRgb) : undefined,
       getLayerRgb: isSet(object.getLayerRgb) ? GetLayerRgbRequest.fromJSON(object.getLayerRgb) : undefined,
       setLayerRgb: isSet(object.setLayerRgb) ? SetLayerRgbRequest.fromJSON(object.setLayerRgb) : undefined,
       clearLayerRgb: isSet(object.clearLayerRgb) ? ClearLayerRgbRequest.fromJSON(object.clearLayerRgb) : undefined,
@@ -808,6 +939,9 @@ export const Request: MessageFns<Request> = {
     const obj: any = {};
     if (message.getInfo !== undefined) {
       obj.getInfo = GetInfoRequest.toJSON(message.getInfo);
+    }
+    if (message.getGlobalRgb !== undefined) {
+      obj.getGlobalRgb = GetGlobalRgbRequest.toJSON(message.getGlobalRgb);
     }
     if (message.getLayerRgb !== undefined) {
       obj.getLayerRgb = GetLayerRgbRequest.toJSON(message.getLayerRgb);
@@ -829,6 +963,9 @@ export const Request: MessageFns<Request> = {
     message.getInfo = (object.getInfo !== undefined && object.getInfo !== null)
       ? GetInfoRequest.fromPartial(object.getInfo)
       : undefined;
+    message.getGlobalRgb = (object.getGlobalRgb !== undefined && object.getGlobalRgb !== null)
+      ? GetGlobalRgbRequest.fromPartial(object.getGlobalRgb)
+      : undefined;
     message.getLayerRgb = (object.getLayerRgb !== undefined && object.getLayerRgb !== null)
       ? GetLayerRgbRequest.fromPartial(object.getLayerRgb)
       : undefined;
@@ -845,6 +982,7 @@ export const Request: MessageFns<Request> = {
 function createBaseResponse(): Response {
   return {
     getInfo: undefined,
+    getGlobalRgb: undefined,
     getLayerRgb: undefined,
     setLayerRgb: undefined,
     clearLayerRgb: undefined,
@@ -857,17 +995,20 @@ export const Response: MessageFns<Response> = {
     if (message.getInfo !== undefined) {
       GetInfoResponse.encode(message.getInfo, writer.uint32(10).fork()).join();
     }
+    if (message.getGlobalRgb !== undefined) {
+      GetGlobalRgbResponse.encode(message.getGlobalRgb, writer.uint32(18).fork()).join();
+    }
     if (message.getLayerRgb !== undefined) {
-      GetLayerRgbResponse.encode(message.getLayerRgb, writer.uint32(18).fork()).join();
+      GetLayerRgbResponse.encode(message.getLayerRgb, writer.uint32(26).fork()).join();
     }
     if (message.setLayerRgb !== undefined) {
-      SetLayerRgbResponse.encode(message.setLayerRgb, writer.uint32(26).fork()).join();
+      SetLayerRgbResponse.encode(message.setLayerRgb, writer.uint32(34).fork()).join();
     }
     if (message.clearLayerRgb !== undefined) {
-      ClearLayerRgbResponse.encode(message.clearLayerRgb, writer.uint32(34).fork()).join();
+      ClearLayerRgbResponse.encode(message.clearLayerRgb, writer.uint32(42).fork()).join();
     }
     if (message.error !== undefined) {
-      writer.uint32(40).int32(message.error);
+      writer.uint32(48).int32(message.error);
     }
     return writer;
   },
@@ -892,7 +1033,7 @@ export const Response: MessageFns<Response> = {
             break;
           }
 
-          message.getLayerRgb = GetLayerRgbResponse.decode(reader, reader.uint32());
+          message.getGlobalRgb = GetGlobalRgbResponse.decode(reader, reader.uint32());
           continue;
         }
         case 3: {
@@ -900,7 +1041,7 @@ export const Response: MessageFns<Response> = {
             break;
           }
 
-          message.setLayerRgb = SetLayerRgbResponse.decode(reader, reader.uint32());
+          message.getLayerRgb = GetLayerRgbResponse.decode(reader, reader.uint32());
           continue;
         }
         case 4: {
@@ -908,11 +1049,19 @@ export const Response: MessageFns<Response> = {
             break;
           }
 
-          message.clearLayerRgb = ClearLayerRgbResponse.decode(reader, reader.uint32());
+          message.setLayerRgb = SetLayerRgbResponse.decode(reader, reader.uint32());
           continue;
         }
         case 5: {
-          if (tag !== 40) {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.clearLayerRgb = ClearLayerRgbResponse.decode(reader, reader.uint32());
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
             break;
           }
 
@@ -931,6 +1080,7 @@ export const Response: MessageFns<Response> = {
   fromJSON(object: any): Response {
     return {
       getInfo: isSet(object.getInfo) ? GetInfoResponse.fromJSON(object.getInfo) : undefined,
+      getGlobalRgb: isSet(object.getGlobalRgb) ? GetGlobalRgbResponse.fromJSON(object.getGlobalRgb) : undefined,
       getLayerRgb: isSet(object.getLayerRgb) ? GetLayerRgbResponse.fromJSON(object.getLayerRgb) : undefined,
       setLayerRgb: isSet(object.setLayerRgb) ? SetLayerRgbResponse.fromJSON(object.setLayerRgb) : undefined,
       clearLayerRgb: isSet(object.clearLayerRgb) ? ClearLayerRgbResponse.fromJSON(object.clearLayerRgb) : undefined,
@@ -942,6 +1092,9 @@ export const Response: MessageFns<Response> = {
     const obj: any = {};
     if (message.getInfo !== undefined) {
       obj.getInfo = GetInfoResponse.toJSON(message.getInfo);
+    }
+    if (message.getGlobalRgb !== undefined) {
+      obj.getGlobalRgb = GetGlobalRgbResponse.toJSON(message.getGlobalRgb);
     }
     if (message.getLayerRgb !== undefined) {
       obj.getLayerRgb = GetLayerRgbResponse.toJSON(message.getLayerRgb);
@@ -965,6 +1118,9 @@ export const Response: MessageFns<Response> = {
     const message = createBaseResponse();
     message.getInfo = (object.getInfo !== undefined && object.getInfo !== null)
       ? GetInfoResponse.fromPartial(object.getInfo)
+      : undefined;
+    message.getGlobalRgb = (object.getGlobalRgb !== undefined && object.getGlobalRgb !== null)
+      ? GetGlobalRgbResponse.fromPartial(object.getGlobalRgb)
       : undefined;
     message.getLayerRgb = (object.getLayerRgb !== undefined && object.getLayerRgb !== null)
       ? GetLayerRgbResponse.fromPartial(object.getLayerRgb)

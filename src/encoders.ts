@@ -22,10 +22,7 @@ export interface Response {
   getInfo?:
     | GetInfoResponse
     | undefined;
-  /**
-   * set_mapping and clear_mapping return ZMK_RPC_NO_RESPONSE (meta.no_response = true)
-   * No explicit response fields needed
-   */
+  /** set_mapping and clear_mapping return ZMK_RPC_NO_RESPONSE (meta.no_response = true) */
   getMapping?: GetMappingResponse | undefined;
 }
 
